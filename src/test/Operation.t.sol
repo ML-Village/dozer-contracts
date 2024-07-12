@@ -20,7 +20,26 @@ contract OperationTest is Setup {
         assertEq(game.balanceOf(user), 1, "!balanceOf");
 
         // TODO : finish epoch & claim winnings 
+        uint256[] memory _amounts;
+        address[] memory _tokens;
 
+        _amounts = new uint256[](1);
+        _tokens = new address[](1);
+        _amounts[0] = _amount / 2;
+        _tokens[0] = address(asset);
+
+        prize.addResults(0, _amounts, _tokens);
+
+        skip(2 hours);
+        vm.roll(1);
+
+        game.processEpoch();
+
+        vm.prank(user);
+        game.claimWinning(0);
+
+        assertEq(asset.balanceOf(user), _amount / 2, "!balanceOfWinnings");
+        assertEq(game.balanceOf(user), 0, "!balanceOf");
 
 
     }

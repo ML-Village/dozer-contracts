@@ -5,12 +5,13 @@ import "forge-std/console.sol";
 import {ExtendedTest} from "./ExtendedTest.sol";
 
 import {dozerGame, ERC20} from "../../dozerGame.sol";
- 
+import {mockPrize} from "../../mockPrize.sol";
 
 contract Setup is ExtendedTest {
     // Contract instances that we will use repeatedly.
     ERC20 public asset;
     dozerGame public game;
+    mockPrize public prize;
 
     mapping(string => address) public tokenAddrs;
 
@@ -41,7 +42,8 @@ contract Setup is ExtendedTest {
         decimals = asset.decimals();
 
         // Deploy the game 
-        game = new dozerGame("Dozer Game", "DG", address(this));
+        prize = new mockPrize();
+        game = new dozerGame("Dozer Game", "DG", address(prize));
 
 
         // label all the used addresses for traces

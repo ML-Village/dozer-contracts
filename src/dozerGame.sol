@@ -30,7 +30,10 @@ contract dozerGame is ERC721 {
     mapping(uint256 => uint256) public entranceValue;
     IPrizeDetails public prizeDetails;
     uint256 public epochNumber;
+    uint256 public epochStartTime;
     uint256 public tokenId;
+
+    uint256 constant EPOCH_DURATION = 1 hours;
     uint256 public minAmount = 10000;
 
     uint256 public entrantCounter;
@@ -41,8 +44,15 @@ contract dozerGame is ERC721 {
         address _prizeDetails
     ) ERC721(_name, _symbol) {
         prizeDetails = IPrizeDetails(_prizeDetails);
+        epochStartTime = block.timestamp;
     }
 
+    // Epoch can be processed permissionlessly by anyone if it's complete 
+    function processEpoch() external {
+        require(block.timestamp > (epochStartTime + EPOCH_DURATION), "Epoch Not Finished Yet");
+        _completeEpoch();
+        epochStartTime = block.timestamp;
+    }
 
     function _completeEpoch() internal {
         uint256[] memory amounts;
@@ -60,6 +70,12 @@ contract dozerGame is ERC721 {
     }
 
     function deposit(address _coin, uint256 _amount) external {
+
+        // If epoch is over, complete it before processing deposit 
+        if (block.timestamp > epochStartTime + EPOCH_DURATION) {
+            _completeEpoch();
+            epochStartTime = block.timestamp;
+        }
 
         // TO DO - this should call Oracle & get "USD" value 
         uint256 depositValue = _amount; 
