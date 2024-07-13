@@ -28,6 +28,9 @@ contract OperationTest is Setup {
     function test_multiple_deposits(uint256 _amount) public {
         vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
 
+
+        mintAndDepositIntoGame(user, address(asset), _amount);
+
         // Deposit into strategy
         uint256 nTokens = 10;
         for (uint256 i = 0; i < nTokens; i++) {
@@ -39,6 +42,32 @@ contract OperationTest is Setup {
             assertEq(game.balanceOf(_newUser), 1, "!balanceOf");
 
         }
+
+        skip(2 hours);
+        vm.roll(1);
+
+
+        uint256[] memory _amounts;
+        address[] memory _tokens;
+
+        _amounts = new uint256[](1);
+        _tokens = new address[](1);
+        _amounts[0] = _amount / 2;
+        _tokens[0] = address(asset);
+
+        game.processEpoch();
+        prize.addResults(0, _amounts, _tokens);
+        for (uint256 i = 0; i < nTokens; i++) {
+            address _newUser = address(uint160(i+1000));
+            
+            assertEq(game.balanceOf(_newUser), 1, "!balanceOf");
+            vm.prank(_newUser);
+            
+            game.claimWinning(i+1);
+            assertEq(game.balanceOf(_newUser), 0, "!nftBurned");
+
+        }
+
 
     }
 
