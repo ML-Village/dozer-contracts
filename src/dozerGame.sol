@@ -120,11 +120,24 @@ contract dozerGame is ERC721, Ownable {
         tokenId += 1;
     } 
 
+    function claimMultiple(uint256[] memory _tokenIds) external {
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            uint256 _tokenId = _tokenIds[i];
+            require(epochNumber > epochs[_tokenId], "Epoch Not Finished Yet");
+            require(resultsComplete[epochs[_tokenId]], "Results Not Written Yet");
+            require(ownerOf(_tokenId) == msg.sender, "Not Owner");
+            _claim(_tokenId);
+        }
+    }
+
     function claimWinning(uint256 _tokenId) external {
         require(epochNumber > epochs[_tokenId], "Epoch Not Finished Yet");
         require(resultsComplete[epochs[_tokenId]], "Results Not Written Yet");
         require(ownerOf(_tokenId) == msg.sender, "Not Owner");
-    
+        _claim(_tokenId);
+    }
+
+    function _claim(uint256 _tokenId) internal {
         uint256 _epoch = epochs[_tokenId];
 
         uint256 a = entranceValue[_tokenId];
@@ -141,7 +154,6 @@ contract dozerGame is ERC721, Ownable {
         }
 
         _burn(_tokenId);
-
     }
 
     function writeResults(uint256 _epochNumber) external {
@@ -157,9 +169,6 @@ contract dozerGame is ERC721, Ownable {
         resultsTokens[_epochNumber] = tokens;
         resultsComplete[_epochNumber] = true;
         emit updatedBoard(board);
-
-        
     }
-
 
 }
