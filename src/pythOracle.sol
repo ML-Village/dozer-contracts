@@ -42,7 +42,6 @@ contract pythOracleReader {
         IPythOracle.Price memory price = oracle.getPriceUnsafe(tokenId);
 
         uint256 uintPrice = uint256(int256(price.price));
-        // TODO : Fix logic for handling exponents + making units consistent
         return uintPrice * _amount * (10 ** uint256(8 + int256(price.expo)));
 
 

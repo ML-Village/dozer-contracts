@@ -41,6 +41,10 @@ contract dozerGame is ERC721, Ownable {
     uint256 constant EPOCH_DURATION = 1 hours;
     uint256 public minAmount = 10000;
 
+    address public feeRecipient;
+    uint256 constant BPS = 10000;
+    uint256 constant fee = 200; // 2%
+
     uint256 public entrantCounter;
 
     constructor(
@@ -52,6 +56,7 @@ contract dozerGame is ERC721, Ownable {
         prizeDetails = IPrizeDetails(_prizeDetails);
         oracle = IOracle(_oracle);
         epochStartTime = block.timestamp;
+        feeRecipient = msg.sender;
     }
 
     // NOTE : Owner can update configuration of the game i.e. set updated oracle / prize interface etc.
@@ -65,6 +70,10 @@ contract dozerGame is ERC721, Ownable {
 
     function setPrizeDetails(address _prizeDetails) external onlyOwner {
         prizeDetails = IPrizeDetails(_prizeDetails);
+    }
+
+    function setFeeRecipient(address _feeRecipient) external onlyOwner {
+        feeRecipient = _feeRecipient;
     }
 
     // NOTE : Epoch can be processed permissionlessly by anyone if it's complete 
@@ -101,6 +110,7 @@ contract dozerGame is ERC721, Ownable {
         require(depositValue >= minAmount, "not enough deposited");
 
         ERC20(_coin).transferFrom(msg.sender, address(this), _amount);
+        ERC20(_coin).safeTransfer(feeRecipient, _amount * fee / BPS);
         _mint(msg.sender, tokenId);
         epochs[tokenId] = epochNumber;
         entranceValue[tokenId] = depositValue;

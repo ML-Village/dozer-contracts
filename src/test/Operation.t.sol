@@ -6,6 +6,8 @@ import {Setup, ERC20} from "./utils/Setup.sol";
 
 import {pythOracleReader} from "../pythOracle.sol";
 
+import {mockERC20} from "../mockERC20.sol";
+
 contract OperationTest is Setup {
     function setUp() public virtual override {
         super.setUp();
@@ -23,12 +25,29 @@ contract OperationTest is Setup {
 
     }
 
+    function test_multiple_deposits(uint256 _amount) public {
+        vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
+
+        // Deposit into strategy
+        uint256 nTokens = 10;
+        for (uint256 i = 0; i < nTokens; i++) {
+            mockERC20 newAsset = new mockERC20("MockAsset", "MA");
+            oracle.addPrice(address(newAsset), 1e8);
+            address _newUser = address(uint160(i+1000));
+            airdrop(ERC20(address(newAsset)), _newUser, _amount);
+            mintAndDepositIntoGame(_newUser, address(newAsset), _amount);
+            assertEq(game.balanceOf(_newUser), 1, "!balanceOf");
+
+        }
+
+    }
+
+
     function test_claim(uint256 _amount) public {
         vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
 
         // Deposit into strategy
         mintAndDepositIntoGame(user, address(asset), _amount);
-        // TODO : finish epoch & claim winnings 
         uint256[] memory _amounts;
         address[] memory _tokens;
 
