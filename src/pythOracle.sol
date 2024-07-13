@@ -21,7 +21,13 @@ contract pythOracleReader {
 
     IPythOracle public oracle;
 
+    constructor(address _oracle) {
+        oracle = IPythOracle(_oracle);
+    }
+
     mapping(address => bytes32) public tokenIds;
+
+
     function addToken(address _token, bytes32 _tokenId) external {
         tokenIds[_token] = _tokenId;
     }
@@ -36,7 +42,8 @@ contract pythOracleReader {
         IPythOracle.Price memory price = oracle.getPriceUnsafe(tokenId);
 
         uint256 uintPrice = uint256(int256(price.price));
-        return uintPrice * _amount / (10 ** uint256(18 + int256(price.expo)));
+        // TODO : Fix logic for handling exponents + making units consistent
+        return uintPrice * _amount * (10 ** uint256(8 + int256(price.expo)));
 
 
     }

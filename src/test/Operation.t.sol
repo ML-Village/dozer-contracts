@@ -4,6 +4,8 @@ pragma solidity ^0.8.18;
 import "forge-std/console.sol";
 import {Setup, ERC20} from "./utils/Setup.sol";
 
+import {pythOracleReader} from "../pythOracle.sol";
+
 contract OperationTest is Setup {
     function setUp() public virtual override {
         super.setUp();
@@ -75,5 +77,23 @@ contract OperationTest is Setup {
 
 
     }
+
+    function test_pyth_oralce(uint256 _amount) public {
+        vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
+
+        address altAsset = tokenAddrs["WBTC"];
+
+        airdrop(ERC20(altAsset), user, _amount);
+
+        // https://docs.pyth.network/price-feeds/contract-addresses/evm
+        pyth = new pythOracleReader(0x4305FB66699C3B2702D4d05CF36551390A4c69C6);
+        game.setOracle(address(pyth));
+
+        pyth.addToken(address(asset), 0xb0948a5e5313200c632b51bb5ca32f6de0d36e9950a942d19751e833f70dabfd);
+
+        mintAndDepositIntoGame(user, address(asset), _amount);
+
+    }
+
 
 }

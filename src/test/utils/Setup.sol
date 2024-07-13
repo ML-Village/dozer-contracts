@@ -7,6 +7,7 @@ import {ExtendedTest} from "./ExtendedTest.sol";
 import {dozerGame, ERC20} from "../../dozerGame.sol";
 import {mockPrize} from "../../mockPrize.sol";
 import {mockOracle} from "../../mockOracle.sol";
+import {pythOracleReader} from "../../pythOracle.sol";
 
 contract Setup is ExtendedTest {
     // Contract instances that we will use repeatedly.
@@ -14,6 +15,7 @@ contract Setup is ExtendedTest {
     dozerGame public game;
     mockPrize public prize;
     mockOracle public oracle;
+    pythOracleReader public pyth;
 
     mapping(string => address) public tokenAddrs;
 
