@@ -10,7 +10,7 @@ contract OperationTest is Setup {
     }
 
 
-    function test_operation(uint256 _amount) public {
+    function test_deposit(uint256 _amount) public {
         vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
 
         // Deposit into strategy
@@ -19,6 +19,13 @@ contract OperationTest is Setup {
         assertEq(game.tokenId(), 1, "!tokenId");
         assertEq(game.balanceOf(user), 1, "!balanceOf");
 
+    }
+
+    function test_claim(uint256 _amount) public {
+        vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
+
+        // Deposit into strategy
+        mintAndDepositIntoGame(user, address(asset), _amount);
         // TODO : finish epoch & claim winnings 
         uint256[] memory _amounts;
         address[] memory _tokens;
@@ -40,6 +47,31 @@ contract OperationTest is Setup {
 
         assertEq(asset.balanceOf(user), _amount / 2, "!balanceOfWinnings");
         assertEq(game.balanceOf(user), 0, "!balanceOf");
+    }
+
+
+    function test_oracle(uint256 _amount) public {
+        vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
+
+        address altAsset = tokenAddrs["WBTC"];
+
+        airdrop(ERC20(altAsset), user, _amount);
+
+        vm.prank(user);
+        ERC20(altAsset).approve(address(game), _amount);
+
+        vm.prank(user);
+        vm.expectRevert();
+        game.deposit(altAsset, _amount);
+
+
+        oracle.addPrice(altAsset, 1e8);
+
+        vm.prank(user);
+        game.deposit(altAsset, _amount);
+
+        assertEq(game.tokenId(), 1, "!tokenId");
+        assertEq(game.balanceOf(user), 1, "!balanceOf");
 
 
     }

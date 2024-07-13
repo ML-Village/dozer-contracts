@@ -6,12 +6,14 @@ import {ExtendedTest} from "./ExtendedTest.sol";
 
 import {dozerGame, ERC20} from "../../dozerGame.sol";
 import {mockPrize} from "../../mockPrize.sol";
+import {mockOracle} from "../../mockOracle.sol";
 
 contract Setup is ExtendedTest {
     // Contract instances that we will use repeatedly.
     ERC20 public asset;
     dozerGame public game;
     mockPrize public prize;
+    mockOracle public oracle;
 
     mapping(string => address) public tokenAddrs;
 
@@ -43,8 +45,10 @@ contract Setup is ExtendedTest {
 
         // Deploy the game 
         prize = new mockPrize();
-        game = new dozerGame("Dozer Game", "DG", address(prize));
+        oracle = new mockOracle();
+        game = new dozerGame("Dozer Game", "DG", address(prize), address(oracle));
 
+        oracle.addPrice(address(asset), 1e8);
 
         // label all the used addresses for traces
         vm.label(keeper, "keeper");

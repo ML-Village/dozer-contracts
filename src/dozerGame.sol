@@ -29,6 +29,7 @@ contract dozerGame is ERC721 {
     mapping(uint256 => uint256) public epochs;
     mapping(uint256 => uint256) public entranceValue;
     IPrizeDetails public prizeDetails;
+    IOracle public oracle;
     uint256 public epochNumber;
     uint256 public epochStartTime;
     uint256 public tokenId;
@@ -41,9 +42,11 @@ contract dozerGame is ERC721 {
     constructor(
         string memory _name, 
         string memory _symbol,
-        address _prizeDetails
+        address _prizeDetails,
+        address _oracle
     ) ERC721(_name, _symbol) {
         prizeDetails = IPrizeDetails(_prizeDetails);
+        oracle = IOracle(_oracle);
         epochStartTime = block.timestamp;
     }
 
@@ -76,10 +79,8 @@ contract dozerGame is ERC721 {
             _completeEpoch();
             epochStartTime = block.timestamp;
         }
-
-        // TO DO - this should call Oracle & get "USD" value 
-        uint256 depositValue = _amount; 
-
+ 
+        uint256 depositValue = oracle.getValue(_coin, _amount);
         require(depositValue >= minAmount, "not enough deposited");
 
         ERC20(_coin).transferFrom(msg.sender, address(this), _amount);
@@ -95,7 +96,6 @@ contract dozerGame is ERC721 {
         require(epochNumber > epochs[_tokenId], "Epoch Not Finished Yet");
         require(ownerOf(_tokenId) == msg.sender, "Not Owner");
     
-        
         uint256 _epoch = epochs[_tokenId];
 
         uint256 a = entranceValue[_tokenId];
