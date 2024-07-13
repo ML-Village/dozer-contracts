@@ -22,6 +22,8 @@ trace-test  :; forge test -vvv --match-test $(test) --fork-url ${FORK_URL}
 snapshot :; forge snapshot -vv --fork-url ${FORK_URL}
 snapshot-diff :; forge snapshot --diff -vv --fork-url ${FORK_URL}
 deploy	:; forge script src/script/deploy.s.sol:deployScript --fork-url ${SEPOLIA_RPC_URL} --broadcast --etherscan-api-key ${ETHERSCAN_API_KEY} --verifier-url ${ETHERSCAN_URL} --verify
+deployToken	:; forge script src/script/mockCoin.s.sol:deployToken --fork-url ${SEPOLIA_RPC_URL} --broadcast --etherscan-api-key ${ETHERSCAN_API_KEY} --verifier-url ${ETHERSCAN_URL} --verify
+runGame	:; forge script src/script/liveTest.s.sol:runGame --fork-url ${SEPOLIA_RPC_URL} --broadcast
 
 
 clean  :; forge clean
