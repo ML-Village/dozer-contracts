@@ -21,7 +21,7 @@ test-test  :; forge test -vv --match-test $(test) --fork-url ${FORK_URL}
 trace-test  :; forge test -vvv --match-test $(test) --fork-url ${FORK_URL}
 snapshot :; forge snapshot -vv --fork-url ${FORK_URL}
 snapshot-diff :; forge snapshot --diff -vv --fork-url ${FORK_URL}
-deploy	:; forge script src/script/deploy.s.sol:deployScript --fork-url ${SEPOLIA_RPC_URL} --broadcast
+deploy	:; forge script src/script/deploy.s.sol:deployScript --fork-url ${SEPOLIA_RPC_URL} --broadcast --etherscan-api-key ${ETHERSCAN_API_KEY} --verifier-url ${ETHERSCAN_URL} --verify
 
 
 clean  :; forge clean
