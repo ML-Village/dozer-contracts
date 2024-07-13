@@ -18,6 +18,9 @@ interface IPrizeDetails {
 
 contract dozerGame is ERC721, Ownable {
 
+    event epochFinished(uint256 epochNumber);
+    event updatedBoard(bool[5][5] board);
+
     using SafeERC20 for ERC20;
     // EPOCH Specific mappings (store relevant info for that epoch for tracking winnings)
     mapping(uint256 => uint256[]) public resultsAmounts;
@@ -86,18 +89,9 @@ contract dozerGame is ERC721, Ownable {
     }
 
     function _completeEpoch() internal {
-        uint256[] memory amounts;
-        address[] memory tokens;
-        bool[5][5] memory newBoard;
-        
-        (amounts, tokens, newBoard) = prizeDetails.getResults(epochNumber, board, entrantCounter);
-
-        board = newBoard;
-        resultsAmounts[epochNumber] = amounts;
-        resultsTokens[epochNumber] = tokens;
 
         epochEntrants[epochNumber] = entrantCounter;
-
+        emit epochFinished(epochNumber);
         entrantCounter = 0;
         epochNumber += 1;
     }
@@ -150,12 +144,20 @@ contract dozerGame is ERC721, Ownable {
 
     }
 
-    function writeResults(uint256 _epochNumber, uint256[] memory _amounts, address[] memory _tokens) external {
+    function writeResults(uint256 _epochNumber) external {
         require(msg.sender == address(prizeDetails), "Only Prize Details can call this function");
         require(!resultsComplete[_epochNumber], "Results Already Written");
-        resultsAmounts[_epochNumber] = _amounts;
-        resultsTokens[_epochNumber] = _tokens;
+        uint256[] memory amounts;
+        address[] memory tokens;
+        bool[5][5] memory newBoard;
+        
+        (amounts, tokens, newBoard) = prizeDetails.getResults(epochNumber, board, entrantCounter);
+        board = newBoard;
+        resultsAmounts[_epochNumber] = amounts;
+        resultsTokens[_epochNumber] = tokens;
         resultsComplete[_epochNumber] = true;
+        emit updatedBoard(board);
+
         
     }
 

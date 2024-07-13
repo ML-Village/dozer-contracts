@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IDozerGame {
-    function writeResults(uint256 _epochNumber, uint256[] memory _amounts, address[] memory _tokens) external;
+    function writeResults(uint256 _epochNumber) external;
 }
 
 contract mockPrize is Ownable{
@@ -35,7 +35,7 @@ contract mockPrize is Ownable{
     function addResults(uint256 _epochNumber, uint256[] memory _amounts, address[] memory _tokens) external onlyKeeper {
         resultsAmounts[_epochNumber] = _amounts;
         resultsTokens[_epochNumber] = _tokens;
-        IDozerGame(dozerGame).writeResults(_epochNumber, _amounts, _tokens);
+        IDozerGame(dozerGame).writeResults(_epochNumber);
     }
 
 
