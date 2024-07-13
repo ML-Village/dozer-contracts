@@ -12,7 +12,7 @@ docs/
 
 # Dotenv file
 .env
-
+*.json
 node_modules/
 .gas-snapshot
 

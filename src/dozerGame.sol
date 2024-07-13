@@ -12,18 +12,18 @@ interface IOracle {
 }
 
 interface IPrizeDetails {
-    function getResults(uint256 _epochNumber) external view returns(uint256[] memory, address[] memory);
+    function getResults(uint256 _epochNumber, bool[5][5] memory _board, uint256 _nEntrants) external view returns(uint256[] memory, address[] memory, bool[5][5] memory);
+    function epochCompleted(uint256 _epochNumber) external view returns(bool);
 }
 
 contract dozerGame is ERC721, Ownable {
 
     using SafeERC20 for ERC20;
-
-
     // EPOCH Specific mappings (store relevant info for that epoch for tracking winnings)
     mapping(uint256 => uint256[]) public resultsAmounts;
     mapping(uint256 => address[]) public resultsTokens;
     mapping(uint256 => uint256) public epochEntrants;
+    mapping(uint256 => bool) public resultsComplete;
 
     // TOKEN Specific mappings (i.e. tracking deposits / epochs for token ID)
     // We map token ID to epoch number to track when prize can be claimed 
@@ -46,6 +46,8 @@ contract dozerGame is ERC721, Ownable {
     uint256 constant fee = 200; // 2%
 
     uint256 public entrantCounter;
+
+    bool[5][5] public board;
 
     constructor(
         string memory _name, 
@@ -86,9 +88,11 @@ contract dozerGame is ERC721, Ownable {
     function _completeEpoch() internal {
         uint256[] memory amounts;
         address[] memory tokens;
+        bool[5][5] memory newBoard;
         
-        (amounts, tokens) = prizeDetails.getResults(epochNumber);
+        (amounts, tokens, newBoard) = prizeDetails.getResults(epochNumber, board, entrantCounter);
 
+        board = newBoard;
         resultsAmounts[epochNumber] = amounts;
         resultsTokens[epochNumber] = tokens;
 
@@ -124,6 +128,7 @@ contract dozerGame is ERC721, Ownable {
 
     function claimWinning(uint256 _tokenId) external {
         require(epochNumber > epochs[_tokenId], "Epoch Not Finished Yet");
+        require(resultsComplete[epochs[_tokenId]], "Results Not Written Yet");
         require(ownerOf(_tokenId) == msg.sender, "Not Owner");
     
         uint256 _epoch = epochs[_tokenId];
@@ -143,6 +148,15 @@ contract dozerGame is ERC721, Ownable {
 
         _burn(_tokenId);
 
+    }
+
+    function writeResults(uint256 _epochNumber, uint256[] memory _amounts, address[] memory _tokens) external {
+        require(msg.sender == address(prizeDetails), "Only Prize Details can call this function");
+        require(!resultsComplete[_epochNumber], "Results Already Written");
+        resultsAmounts[_epochNumber] = _amounts;
+        resultsTokens[_epochNumber] = _tokens;
+        resultsComplete[_epochNumber] = true;
+        
     }
 
 

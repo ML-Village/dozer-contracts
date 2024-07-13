@@ -50,6 +50,8 @@ contract Setup is ExtendedTest {
         oracle = new mockOracle();
         game = new dozerGame("Dozer Game", "DG", address(prize), address(oracle));
 
+        prize.setDozerGame(address(game));
+
         oracle.addPrice(address(asset), 1e8);
 
         // label all the used addresses for traces
