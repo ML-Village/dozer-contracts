@@ -5,6 +5,7 @@ import {ERC20} from "@tokenized-strategy/BaseStrategy.sol";
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IOracle {
     function getValue(address _token, uint256 _amount) external view returns(uint256);
@@ -14,7 +15,7 @@ interface IPrizeDetails {
     function getResults(uint256 _epochNumber) external view returns(uint256[] memory, address[] memory);
 }
 
-contract dozerGame is ERC721 {
+contract dozerGame is ERC721, Ownable {
 
     using SafeERC20 for ERC20;
 
@@ -34,6 +35,9 @@ contract dozerGame is ERC721 {
     uint256 public epochStartTime;
     uint256 public tokenId;
 
+    mapping(uint256 => uint256) public depositAmt;
+    mapping(uint256 => address) public depositToken;
+
     uint256 constant EPOCH_DURATION = 1 hours;
     uint256 public minAmount = 10000;
 
@@ -50,7 +54,20 @@ contract dozerGame is ERC721 {
         epochStartTime = block.timestamp;
     }
 
-    // Epoch can be processed permissionlessly by anyone if it's complete 
+    // NOTE : Owner can update configuration of the game i.e. set updated oracle / prize interface etc.
+    function setMinAmount(uint256 _minAmount) external onlyOwner {
+        minAmount = _minAmount;
+    }
+
+    function setOracle(address _oracle) external onlyOwner {
+        oracle = IOracle(_oracle);
+    }
+
+    function setPrizeDetails(address _prizeDetails) external onlyOwner {
+        prizeDetails = IPrizeDetails(_prizeDetails);
+    }
+
+    // NOTE : Epoch can be processed permissionlessly by anyone if it's complete 
     function processEpoch() external {
         require(block.timestamp > (epochStartTime + EPOCH_DURATION), "Epoch Not Finished Yet");
         _completeEpoch();
@@ -88,6 +105,9 @@ contract dozerGame is ERC721 {
         epochs[tokenId] = epochNumber;
         entranceValue[tokenId] = depositValue;
         entrantCounter += depositValue;
+
+        depositAmt[tokenId] = _amount;
+        depositToken[tokenId] = _coin;
 
         tokenId += 1;
     } 

@@ -21,6 +21,7 @@ test-test  :; forge test -vv --match-test $(test) --fork-url ${FORK_URL}
 trace-test  :; forge test -vvv --match-test $(test) --fork-url ${FORK_URL}
 snapshot :; forge snapshot -vv --fork-url ${FORK_URL}
 snapshot-diff :; forge snapshot --diff -vv --fork-url ${FORK_URL}
+deploy	:; forge script script/deploy.s.sol:deployScript --fork-url ${SEPOLIA_RPC_URL} --broadcast
 
 
 clean  :; forge clean
