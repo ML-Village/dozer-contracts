@@ -2,6 +2,12 @@
 
 This repo contains smart contracts & unit tests for ETH Brussels Hackathon "Shitcoin Dozer Game Contract" using [Foundry](https://book.getfoundry.sh/).
 
+## Deployed Addresses (Game)
+Base : 0x9d71865290cca388D427807C971fe7f6C364f5B4
+Arbi : 0x254aEC4487b08A53c32De73f234574246f1A0052
+Scroll : 0x9Db954a49B6Bf304ACc4B5D76c723c1cC9C7E073
+Polygon : 
+
 ## How to start
 
 ### Requirements
